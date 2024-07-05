@@ -196,9 +196,10 @@ async def votos_titulo(titulo: str):
 # Ejemplo de retorno: El actor X ha participado de X cantidad de filmaciones,
 #                      el mismo ha conseguido un retorno de X con un promedio de X por filmación
 #uvicorn main:app --reload
-df_movies = df_movies.rename(columns={'id': 'id_credit'})
+
 @app.get("/get_actor/{actor}")
 async def get_actor(actor: str):
+    df_movies = df_movies.rename(columns={'id': 'id_credit'})
     datos_cast['name'] = datos_cast['name'].str.lower()
     actor = actor.strip().lower()
     df_cast_filtrado = datos_cast[datos_cast['name']== actor]
@@ -217,10 +218,11 @@ async def get_actor(actor: str):
 # fecha de lanzamiento, retorno individual, costo y ganancia de la misma.
 
 #uvicorn main:app --reload
-datos_crew['job'] = datos_crew['job'].str.lower()
-datos_crew['name'] = datos_crew['name'].str.lower()
+
 @app.get("/get_director/{director}")
 async def get_director(director: str):
+    datos_crew['job'] = datos_crew['job'].str.lower()
+    datos_crew['name'] = datos_crew['name'].str.lower()
     director = director.strip().lower()
     director_movies = datos_crew[(datos_crew['job'] == 'director') & (datos_crew['name'] == director)]
     if director_movies.empty:
