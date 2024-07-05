@@ -18,9 +18,9 @@ import ast
 
 app = FastAPI()
 
-df_movies = pd.read_csv('movies.csv',parse_dates=['release_date'])
-datos_crew = pd.read_csv('df_crew.csv')
-datos_cast = pd.read_csv('df_cast.csv')
+df_movies = pd.read_csv('data/movies.csv',parse_dates=['release_date'])
+datos_crew = pd.read_csv('data/df_crew.csv')
+datos_cast = pd.read_csv('data/df_cast.csv')
 
 #class pelicula_mes(BaseModel):
     #mes: str
