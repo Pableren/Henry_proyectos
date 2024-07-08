@@ -30,11 +30,7 @@ datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow')
 datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow')
 ### debido a la transformacion de los datos anidados, debemos usar json.loads y json.dumps para
 ### serializarlo o deserializarlo
-df_movies['belongs_to_collection'] = df_movies['belongs_to_collection'].apply(json.loads)
 df_movies['genres'] = df_movies['genres'].apply(json.loads)
-df_movies['production_companies'] = df_movies['production_companies'].apply(json.loads)
-df_movies['production_countries'] = df_movies['production_countries'].apply(json.loads)
-df_movies['spoken_languages'] = df_movies['spoken_languages'].apply(json.loads)
 
 df_movies = df_movies.rename(columns={'id': 'id_credit'})
 
