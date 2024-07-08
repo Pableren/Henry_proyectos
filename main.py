@@ -25,9 +25,7 @@ import nltk
 
 app = FastAPI()
 
-df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow',columns=['id','overview',
-            'popularity','release_date', 'revenue''title', 'vote_average',
-            'vote_count', 'release_year', 'return'])
+df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
 datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow')
 datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow')
 ### debido a la transformacion de los datos anidados, debemos usar json.loads y json.dumps para
@@ -199,7 +197,6 @@ async def votos_titulo(titulo: str):
         año = filmacion['release_year'].values[0]
         votos = filmacion['vote_count'].values[0]
         promedio = filmacion['vote_average'].values[0]
-        print(titulo)
         return {f"la pelicula {title} fue estrenada en el año {año}. La misma cuenta con un total de {votos} valoraciones, con un promedio de {promedio}":title}
     except:
         return {"No se encontró información sobre la filmación:":titulo}
