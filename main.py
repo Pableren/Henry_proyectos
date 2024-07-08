@@ -23,17 +23,13 @@ import nltk
 #nltk.download('popular')
 ## librerias para el Sistema de recomendacion
 
-
-
-
 app = FastAPI()
 
-df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
-df_movies = df_movies[:10000]
+df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow',columns=['id','overview',
+            'popularity','release_date', 'revenue''title', 'vote_average',
+            'vote_count', 'release_year', 'return'])
 datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow')
-datos_crew = datos_crew[:10000]
 datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow')
-datos_cast = datos_crew[:10000]
 ### debido a la transformacion de los datos anidados, debemos usar json.loads y json.dumps para
 ### serializarlo o deserializarlo
 df_movies['belongs_to_collection'] = df_movies['belongs_to_collection'].apply(json.loads)
