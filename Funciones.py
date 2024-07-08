@@ -5,7 +5,7 @@ import re
 import json
 import ast
 
-df = pd.read_csv('movies.csv',parse_dates=['release_date'])
+#df = pd.read_csv('movies.csv',parse_dates=['release_date'])
 #df_unico = df.drop_duplicates(subset=['id', 'release_date'])
 #cantidad_peliculas_mes = df_unico['release_date'].dt.month.value_counts()
 #cantidad_peliculas_mes.sort_index(inplace=True)
@@ -65,7 +65,7 @@ def cantidad_peliculas_mes(mes: str):
         print("valor no valido, use solo letras sin tildes")
         return {}
 
-enero = cantidad_peliculas_mes('enero')
+#enero = cantidad_peliculas_mes('enero')
 #print(enero)
 
 #def cantidad_filmaciones_dia( Dia ): Se ingresa un día en idioma Español.
@@ -78,7 +78,7 @@ def cantidad_filmaciones_diaDelMes(dia: int):
     peliculas_dia.sort_index(inplace=True)
     retorno = peliculas_dia[dia]
     return {f"la cantidad de peliculas estrenadas el dia {dia} es:":retorno}
-peliculas = cantidad_filmaciones_diaDelMes(30)
+#peliculas = cantidad_filmaciones_diaDelMes(30)
 #print(peliculas)
 #print(type(peliculas))
 
@@ -115,8 +115,8 @@ def cantidad_filmaciones_diaDeSemana(dia: str):
         retorno = {f"la cantidad de peliculas estrenadas un {dia} fueron: ":peliculas_dia[dia]}
         return retorno
 
-peliculas_semana = cantidad_filmaciones_diaDeSemana('domingo')
-print(peliculas_semana)
+#peliculas_semana = cantidad_filmaciones_diaDeSemana('domingo')
+#print(peliculas_semana)
 #print(type(peliculas_semana))
 
 #def score_titulo( titulo_de_la_filmación ):
@@ -141,7 +141,7 @@ def score_titulo(titulo):
 #var = score_titulo(" Toy Story ")
 #print(var)
 
-
+"""
 def votos_titulo(titulo):
     titulo = str(titulo).strip().lower()
     df['title'] = df['title'].str.lower()
@@ -160,7 +160,6 @@ def votos_titulo(titulo):
     except:
         return {f"No se encontró información sobre la filmación:'":{titulo}}
 
-"""
 df = df.rename(columns={'id': 'id_credit'})
 async def get_actor(actor: str):
     datos_cast['name'] = datos_cast['name'].str.lower()
