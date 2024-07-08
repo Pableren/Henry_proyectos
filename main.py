@@ -20,7 +20,6 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import nltk
-nltk.download('popular')
 ## librerias para el Sistema de recomendacion
 
 app = FastAPI()
@@ -250,7 +249,7 @@ async def get_director(director: str):
      #       "peliculas": peliculas_director}
 
 nltk.download('stopwords')
-
+#nltk.download('popular')
 
 stopwords = nltk.corpus.stopwords.words('english')
 lemmatizer = WordNetLemmatizer()
@@ -335,7 +334,7 @@ async def recomendacionCV(titulo: str):
         #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
 
         # Usando CountVectorizer
-        count = CountVectorizer(max_df=0.1, max_features=15)
+        count = CountVectorizer(max_df=0.1, max_features=10)
         count_matrix = count.fit_transform(df_filtrado['processed_overview'])
 
         # Calcular la similitud del coseno
@@ -370,7 +369,7 @@ async def recomendacionHV(titulo: str):
         #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
 
         # Usando HashingVectorizer
-        hashing = HashingVectorizer(n_features=15, alternate_sign=False)
+        hashing = HashingVectorizer(n_features=10, alternate_sign=False)
         hashing_matrix = hashing.fit_transform(df_filtrado['processed_overview'])
 
         # Calcular la similitud del coseno
