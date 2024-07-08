@@ -6,13 +6,13 @@
 #levantar servidor uvicorn: uvicorn main:app --reload
 from fastapi import FastAPI
 import pandas as pd
-from pydantic import BaseModel
-from fastapi.responses import JSONResponse
+#from pydantic import BaseModel
+#from fastapi.responses import JSONResponse
 import pandas as pd
 import numpy as np
 import json
 
-from sklearn.feature_extraction.text import TfidfVectorizer
+#from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -29,6 +29,11 @@ app = FastAPI()
 df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
 datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow')
 datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow')
+# recorte de los datos a un poco mas de la cuarta parte de los datos
+df_movies = df_movies[:12000]
+datos_crew = datos_crew[:120000]
+datos_cast = datos_cast[:140000]
+
 ### debido a la transformacion de los datos anidados, debemos usar json.loads y json.dumps para
 ### serializarlo o deserializarlo
 df_movies['genres'] = df_movies['genres'].apply(json.loads)
@@ -39,15 +44,6 @@ df_movies = df_movies.rename(columns={'id': 'id_credit'})
 @app.get("/")
 async def root():
     return "Raiz de la API"
-
-@app.get("/url")
-async def url():
-    return {"url_repo":"https://github.com/Pableren/Proyectos.git"}
-
-@app.get("/items/{item_id}")
-async def read_item(item_id):
-    return {"item_id": item_id}
-
 
 #Funcion para cantidad de filmaciones por mes:
 # pasar datos como: 127.0.0.1:8000/filmaciones_mes/enero
@@ -272,13 +268,84 @@ def contiene_genero(genres, genres_to_filter):
     return any(genre in genres_list for genre in genres_to_filter)
 
 
-df_movies['generos'] = df_movies['genres'].apply(juntar_listas)
-df_movies['title'] = df_movies['title'].str.lower()
-df_movies = df_movies.dropna(axis=0,subset=['overview'])
+
 ### Funcion recomendacion(titulo): Se ingresa el nombre de una película y te recomienda
 ### las similares en una lista de 5 valores.
 #uvicorn main:app --reload
+df_movies['generos'] = df_movies['genres'].apply(juntar_listas)
+df_movies['title'] = df_movies['title'].str.lower()
+df_movies = df_movies.dropna(axis=0,subset=['overview'])
+df_movies['processed_overview'] = df_movies['overview'].apply(preprocesamiento)
+
+from sklearn.feature_extraction.text import CountVectorizer
+@app.get("/recomendacion/{titulo}")
+async def recomendacion(titulo: str):
+    titulo = str(titulo).strip().lower()
+    try:
+        linea = df_movies[df_movies['title'] == titulo]
+        generos = linea['generos']
+        generos_list = generos.str.split(',')
+        generos_list = list(generos_list.values)
+        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
+        df_filtrado.drop_duplicates(subset=['title'], inplace=True)
+        df_filtrado = df_filtrado.reset_index()
+        df_filtrado.drop(columns=['index'], inplace=True)
+        indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
+        #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
+
+        # Usando CountVectorizer
+        count = CountVectorizer(max_df=0.2, max_features=25)
+        count_matrix = count.fit_transform(df_filtrado['processed_overview'])
+
+        # Calcular la similitud del coseno
+        cosine_sim = linear_kernel(count_matrix, count_matrix)
+        idx = indices[titulo]
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        sim_scores = sim_scores[1:6]
+        movie_indices = [i[0] for i in sim_scores]
+        lista_top = df_movies['title'].iloc[movie_indices].tolist()
+        return {f'Las recomendaciones para {titulo} son: ': lista_top}
+    except:
+        return {"la pelicula no se encuentra en el sistema:": titulo}
+
+
 """
+from sklearn.feature_extraction.text import HashingVectorizer
+
+
+@app.get("/recomendacionHV/{titulo}")
+async def recomendacionHV(titulo: str):
+    titulo = str(titulo).strip().lower()
+    try:
+        linea = df_movies[df_movies['title'] == titulo]
+        generos = linea['generos']
+        generos_list = generos.str.split(',')
+        generos_list = list(generos_list.values)
+        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
+        df_filtrado.drop_duplicates(subset=['title'], inplace=True)
+        df_filtrado = df_filtrado.reset_index()
+        df_filtrado.drop(columns=['index'], inplace=True)
+        indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
+        #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
+
+        # Usando HashingVectorizer
+        hashing = HashingVectorizer(n_features=10, alternate_sign=False)
+        hashing_matrix = hashing.fit_transform(df_filtrado['processed_overview'])
+
+        # Calcular la similitud del coseno
+        cosine_sim = linear_kernel(hashing_matrix, hashing_matrix)
+        idx = indices[titulo]
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        sim_scores = sim_scores[1:6]
+        movie_indices = [i[0] for i in sim_scores]
+        lista_top = df_movies['title'].iloc[movie_indices].tolist()
+        return {f'Las recomendaciones para {titulo} son: ': lista_top}
+    except:
+        return {"la pelicula no se encuentra en el sistema:": titulo}
+    
+    
 @app.get("/recomendacion/{titulo}")
 async def recomendacion(titulo: str):
     titulo =str(titulo).strip().lower()
@@ -313,75 +380,5 @@ async def recomendacion(titulo: str):
         return {f'Las recomendaciones para {titulo} son: ':lista_top}
     except:
         return{"la pelicula no se encuentra en el sistema:":titulo}
+
 """
-
-### COUNTVECTORIZER
-### Mas eficiente que tfidfVectorizer
-
-df_movies['processed_overview'] = df_movies['overview'].apply(preprocesamiento)
-from sklearn.feature_extraction.text import CountVectorizer
-@app.get("/recomendacionCV/{titulo}")
-async def recomendacionCV(titulo: str):
-    titulo = str(titulo).strip().lower()
-    try:
-        linea = df_movies[df_movies['title'] == titulo]
-        generos = linea['generos']
-        generos_list = generos.str.split(',')
-        generos_list = list(generos_list.values)
-        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
-        df_filtrado.drop_duplicates(subset=['title'], inplace=True)
-        df_filtrado = df_filtrado.reset_index()
-        df_filtrado.drop(columns=['index'], inplace=True)
-        indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
-        #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
-
-        # Usando CountVectorizer
-        count = CountVectorizer(max_df=0.1, max_features=10)
-        count_matrix = count.fit_transform(df_filtrado['processed_overview'])
-
-        # Calcular la similitud del coseno
-        cosine_sim = linear_kernel(count_matrix, count_matrix)
-        idx = indices[titulo]
-        sim_scores = list(enumerate(cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:6]
-        movie_indices = [i[0] for i in sim_scores]
-        lista_top = df_movies['title'].iloc[movie_indices].tolist()
-        return {f'Las recomendaciones para {titulo} son: ': lista_top}
-    except:
-        return {"la pelicula no se encuentra en el sistema:": titulo}
-
-
-from sklearn.feature_extraction.text import HashingVectorizer
-
-
-@app.get("/recomendacionHV/{titulo}")
-async def recomendacionHV(titulo: str):
-    titulo = str(titulo).strip().lower()
-    try:
-        linea = df_movies[df_movies['title'] == titulo]
-        generos = linea['generos']
-        generos_list = generos.str.split(',')
-        generos_list = list(generos_list.values)
-        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
-        df_filtrado.drop_duplicates(subset=['title'], inplace=True)
-        df_filtrado = df_filtrado.reset_index()
-        df_filtrado.drop(columns=['index'], inplace=True)
-        indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
-        #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
-
-        # Usando HashingVectorizer
-        hashing = HashingVectorizer(n_features=10, alternate_sign=False)
-        hashing_matrix = hashing.fit_transform(df_filtrado['processed_overview'])
-
-        # Calcular la similitud del coseno
-        cosine_sim = linear_kernel(hashing_matrix, hashing_matrix)
-        idx = indices[titulo]
-        sim_scores = list(enumerate(cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:6]
-        movie_indices = [i[0] for i in sim_scores]
-        lista_top = df_movies['title'].iloc[movie_indices].tolist()
-        return {f'Las recomendaciones para {titulo} son: ': lista_top}
-    except:
-        return {"la pelicula no se encuentra en el sistema:": titulo}
