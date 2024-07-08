@@ -10,9 +10,7 @@ from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 import pandas as pd
 import numpy as np
-import re
 import json
-import ast
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
