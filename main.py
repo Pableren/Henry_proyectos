@@ -277,6 +277,7 @@ df_movies = df_movies.dropna(axis=0,subset=['overview'])
 ### Funcion recomendacion(titulo): Se ingresa el nombre de una película y te recomienda
 ### las similares en una lista de 5 valores.
 #uvicorn main:app --reload
+"""
 @app.get("/recomendacion/{titulo}")
 async def recomendacion(titulo: str):
     titulo =str(titulo).strip().lower()
@@ -311,4 +312,35 @@ async def recomendacion(titulo: str):
         return {f'Las recomendaciones para {titulo} son: ':lista_top}
     except:
         return{"la pelicula no se encuentra en el sistema:":titulo}
+"""
+from sklearn.feature_extraction.text import CountVectorizer
+@app.get("/recomendacion/{titulo}")
+async def recomendacion(titulo: str):
+    titulo = str(titulo).strip().lower()
+    try:
+        linea = df_movies[df_movies['title'] == titulo]
+        generos = linea['generos']
+        generos_list = generos.str.split(',')
+        generos_list = list(generos_list.values)
+        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
+        df_filtrado.drop_duplicates(subset=['title'], inplace=True)
+        df_filtrado = df_filtrado.reset_index()
+        df_filtrado.drop(columns=['index'], inplace=True)
+        indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
+        df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
 
+        # Usando CountVectorizer
+        count = CountVectorizer(max_df=0.2, max_features=25)
+        count_matrix = count.fit_transform(df_filtrado['processed_overview'])
+
+        # Calcular la similitud del coseno
+        cosine_sim = linear_kernel(count_matrix, count_matrix)
+        idx = indices[titulo]
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        sim_scores = sim_scores[1:6]
+        movie_indices = [i[0] for i in sim_scores]
+        lista_top = df_movies['title'].iloc[movie_indices].tolist()
+        return {f'Las recomendaciones para {titulo} son: ': lista_top}
+    except:
+        return {"la pelicula no se encuentra en el sistema:": titulo}
