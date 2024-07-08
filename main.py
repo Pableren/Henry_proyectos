@@ -297,7 +297,7 @@ async def recomendacion(titulo: str):
         # max_df = 0.5 equivale a eliminar del modelo los términos que aparecen en más del 50% de los documentos o peliculas.
         # es decir, mientras mas reduzca el parametro "max_df" mayor sera la
         # importancia relativa de las palabras menos frecuentes
-        tfidf = TfidfVectorizer(max_df=0.5, max_features=100, sublinear_tf=True)
+        tfidf = TfidfVectorizer(max_df=0.5, max_features=50, sublinear_tf=True)
         # por el hecho del costo computacional que genera esta vectorizacion de palabras se usara max_features=50
         tfidf_matrix = tfidf.fit_transform(df_filtrado['processed_overview'])
         # Calcular la similitud del coseno
