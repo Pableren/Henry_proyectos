@@ -312,13 +312,15 @@ async def recomendacion(titulo: str):
         return {f'Las recomendaciones para {titulo} son: ':lista_top}
     except:
         return{"la pelicula no se encuentra en el sistema:":titulo}
-
+"""
 
 ### COUNTVECTORIZER
 ### Mas eficiente que tfidfVectorizer
+
+df_movies['processed_overview'] = df_movies['overview'].apply(preprocesamiento)
 from sklearn.feature_extraction.text import CountVectorizer
-@app.get("/recomendacion/{titulo}")
-async def recomendacion(titulo: str):
+@app.get("/recomendacionCV/{titulo}")
+async def recomendacionCV(titulo: str):
     titulo = str(titulo).strip().lower()
     try:
         linea = df_movies[df_movies['title'] == titulo]
@@ -330,10 +332,10 @@ async def recomendacion(titulo: str):
         df_filtrado = df_filtrado.reset_index()
         df_filtrado.drop(columns=['index'], inplace=True)
         indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
-        df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
+        #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
 
         # Usando CountVectorizer
-        count = CountVectorizer(max_df=0.2, max_features=25)
+        count = CountVectorizer(max_df=0.1, max_features=15)
         count_matrix = count.fit_transform(df_filtrado['processed_overview'])
 
         # Calcular la similitud del coseno
@@ -347,12 +349,13 @@ async def recomendacion(titulo: str):
         return {f'Las recomendaciones para {titulo} son: ': lista_top}
     except:
         return {"la pelicula no se encuentra en el sistema:": titulo}
-"""
+
 
 from sklearn.feature_extraction.text import HashingVectorizer
 
-@app.get("/recomendacion/{titulo}")
-async def recomendacion(titulo: str):
+
+@app.get("/recomendacionHV/{titulo}")
+async def recomendacionHV(titulo: str):
     titulo = str(titulo).strip().lower()
     try:
         linea = df_movies[df_movies['title'] == titulo]
@@ -364,10 +367,10 @@ async def recomendacion(titulo: str):
         df_filtrado = df_filtrado.reset_index()
         df_filtrado.drop(columns=['index'], inplace=True)
         indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
-        df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
+        #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
 
         # Usando HashingVectorizer
-        hashing = HashingVectorizer(n_features=25, alternate_sign=False)
+        hashing = HashingVectorizer(n_features=15, alternate_sign=False)
         hashing_matrix = hashing.fit_transform(df_filtrado['processed_overview'])
 
         # Calcular la similitud del coseno
