@@ -20,6 +20,9 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+
 ## librerias para el Sistema de recomendacion
 
 app = FastAPI()
@@ -248,7 +251,7 @@ async def get_director(director: str):
     #return {"exito": total_return,
      #       "peliculas": peliculas_director}
 
-nltk.download('stopwords')
+
 #nltk.download('popular')
 
 stopwords = nltk.corpus.stopwords.words('english')
