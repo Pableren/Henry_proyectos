@@ -29,10 +29,10 @@ app = FastAPI()
 df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
 datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow')
 datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow')
-# recorte de los datos a un poco mas de la cuarta parte de los datos
-df_movies = df_movies[:12000]
-datos_crew = datos_crew[:120000]
-datos_cast = datos_cast[:140000]
+# recorte de los datos a un poco mas de la octava parte de los datos
+df_movies = df_movies[:6000]
+datos_crew = datos_crew[:60000]
+datos_cast = datos_cast[:70000]
 
 ### debido a la transformacion de los datos anidados, debemos usar json.loads y json.dumps para
 ### serializarlo o deserializarlo
