@@ -312,7 +312,10 @@ async def recomendacion(titulo: str):
         return {f'Las recomendaciones para {titulo} son: ':lista_top}
     except:
         return{"la pelicula no se encuentra en el sistema:":titulo}
-"""
+
+
+### COUNTVECTORIZER
+### Mas eficiente que tfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 @app.get("/recomendacion/{titulo}")
 async def recomendacion(titulo: str):
@@ -335,6 +338,40 @@ async def recomendacion(titulo: str):
 
         # Calcular la similitud del coseno
         cosine_sim = linear_kernel(count_matrix, count_matrix)
+        idx = indices[titulo]
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        sim_scores = sim_scores[1:6]
+        movie_indices = [i[0] for i in sim_scores]
+        lista_top = df_movies['title'].iloc[movie_indices].tolist()
+        return {f'Las recomendaciones para {titulo} son: ': lista_top}
+    except:
+        return {"la pelicula no se encuentra en el sistema:": titulo}
+"""
+
+from sklearn.feature_extraction.text import HashingVectorizer
+
+@app.get("/recomendacion/{titulo}")
+async def recomendacion(titulo: str):
+    titulo = str(titulo).strip().lower()
+    try:
+        linea = df_movies[df_movies['title'] == titulo]
+        generos = linea['generos']
+        generos_list = generos.str.split(',')
+        generos_list = list(generos_list.values)
+        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
+        df_filtrado.drop_duplicates(subset=['title'], inplace=True)
+        df_filtrado = df_filtrado.reset_index()
+        df_filtrado.drop(columns=['index'], inplace=True)
+        indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
+        df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
+
+        # Usando HashingVectorizer
+        hashing = HashingVectorizer(n_features=25, alternate_sign=False)
+        hashing_matrix = hashing.fit_transform(df_filtrado['processed_overview'])
+
+        # Calcular la similitud del coseno
+        cosine_sim = linear_kernel(hashing_matrix, hashing_matrix)
         idx = indices[titulo]
         sim_scores = list(enumerate(cosine_sim[idx]))
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
