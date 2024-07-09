@@ -261,7 +261,7 @@ async def recomendacion(titulo: str):
         df_filtrado.drop(columns=['index'], inplace=True)
         indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
         # CountVectorizer
-        count = CountVectorizer(max_df=0.8, max_features=50) # instanciamos el CountVectorizer
+        count = CountVectorizer(max_df=0.3, max_features=20) # instanciamos el CountVectorizer
         # transformamos la data ya lematizada.
         count_matrix = count.fit_transform(df_filtrado['processed_overview']) 
         # Calcular la similitud del coseno
