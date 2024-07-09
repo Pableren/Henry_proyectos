@@ -11,7 +11,7 @@ from sklearn.metrics.pairwise import linear_kernel
 
 app = FastAPI()
 #lectura de los datos
-df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow',columns=['title', 'release_year', 'popularity', 'id','release_date','overview_tokenizado'])
+df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow',columns=['title', 'release_year', 'popularity', 'id','release_date','overview_tokenizado','genres'])
 datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow',columns=['job', 'name'])
 datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow',columns=['name'])
 #recorte de los datasets
@@ -123,7 +123,6 @@ async def cantidad_filmaciones_dia(dia: str):
         return {}
 
 
-df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
 @app.get("/score_titulo/{titulo}")
 async def score_titulo(titulo: str):
     """_summary_
@@ -187,9 +186,6 @@ async def get_actor(actor: str):
         return {f"El actor {actor} ha participado de {cantidad_peliculas} filmaciones, el mismo ha conseguido un retorno de {retorno_total} con un promedio de {promedio_retorno:.2f} por filmación.": actor}
     else:
         return {f"El actor no se encuentra en el sistema ":actor}
-
-#uvicorn main:app --reload
-
 @app.get("/get_director/{director}")
 async def get_director(director: str):
     """
