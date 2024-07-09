@@ -17,13 +17,16 @@ nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
+
 app = FastAPI()
 #lectura de los datos
 df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
 datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow')
 datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow')
-
-
+#recorte de los datasets
+df_movies = df_movies[:6000]
+datos_crew = datos_crew[:60000]
+datos_cast = datos_cast[:70000]
 
 ### debido a la transformacion de los datos anidados, debemos usar json.loads y json.dumps para
 ### serializarlo o deserializarlo
@@ -43,6 +46,7 @@ async def cantidad_filmaciones_mes(mes: str):
     """
     Se ingresa un mes en idioma Español. Debe devolver la cantidad
     de películas que fueron estrenadas en el mes consultado en la totalidad del dataset.
+    Basado en las primeras 6000 lineas de la data general
     ej: agosto
     """
     df_unico = df_movies.drop_duplicates(subset=['id_credit', 'release_date'])
@@ -96,6 +100,7 @@ async def cantidad_filmaciones_dia(dia: str):
     """_summary_
     Se ingresa un día en idioma Español. Funcion para cantidad de filmaciones por dia
     ej: Lunes o lunes
+    Basado en las primeras 6000 lineas de la data general
     """
     dia = str(dia).lower()
     df_unico = df_movies.drop_duplicates(subset=['id_credit', 'release_date'])
@@ -135,6 +140,7 @@ async def score_titulo(titulo: str):
     """_summary_
     def score_titulo( titulo_de_la_filmación ): Se ingresa el título de una filmación esperando
     como respuesta el título, el año de estreno y el score.
+    Basado en las primeras 6000 lineas de la data general
     ej: Toy Story
     """
     titulo = str(titulo).strip().lower()
@@ -153,6 +159,7 @@ async def votos_titulo(titulo: str):
     """
     def votos_titulo( titulo_de_la_filmación ): Se ingresa el título de una filmación esperando
     como respuesta el título, la cantidad de votos y el valor promedio de las votaciones.
+    Basado en las primeras 6000 lineas de la data general
     ej: Toy Story
     """
     titulo = str(titulo).strip().lower()
@@ -177,6 +184,7 @@ async def get_actor(actor: str):
     """
     def get_actor( nombre_actor ): Se ingresa el nombre de un actor que se encuentre dentro
     de un dataset debiendo devolver el éxito del mismo medido a través del retorno.
+    Basado en las primeras 6000 lineas de la data general
     ej: Tom Hanks
     """
     datos_cast['name'] = datos_cast['name'].str.lower()
@@ -199,6 +207,7 @@ async def get_director(director: str):
     def get_director( nombre_director ): Se ingresa el nombre de un director que se
     encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través
     del retorno.
+    Basado en las primeras 6000 lineas de la data general
     ej: John Lasseter - Tom Hanks
     """
     datos_crew['job'] = datos_crew['job'].str.lower()
@@ -224,19 +233,14 @@ async def get_director(director: str):
 
 
 from Funciones import juntar_listas
-from Funciones import preprocesamiento
 from Funciones import contiene_genero
-stopwords = nltk.corpus.stopwords.words('english')
-lemmatizer = WordNetLemmatizer()
+#stopwords = nltk.corpus.stopwords.words('english')
+#lemmatizer = WordNetLemmatizer()
 # recorte de los dataframes a un poco mas de la octava parte de los datos
-df_movies = df_movies[:6000]
-datos_crew = datos_crew[:60000]
-datos_cast = datos_cast[:70000]
 df_movies['generos'] = df_movies['genres'].apply(juntar_listas)
 df_movies['title'] = df_movies['title'].str.lower()
 df_movies = df_movies.dropna(axis=0,subset=['overview'])
 df_movies = df_movies.drop_duplicates(subset=['title'])
-df_movies['processed_overview'] = df_movies['overview'].apply(preprocesamiento)
 
 @app.get("/recomendacion/{titulo}")
 async def recomendacion(titulo: str):
@@ -264,7 +268,7 @@ async def recomendacion(titulo: str):
         count = CountVectorizer(max_df=0.1, max_features=35) # instanciamos el CountVectorizer
         # max_df= 0.1 y 35 palabras
         # transformamos la data ya lematizada.
-        count_matrix = count.fit_transform(df_filtrado['processed_overview']) 
+        count_matrix = count.fit_transform(df_filtrado['overview_tokenizado']) 
         # Calcular la similitud del coseno
         cosine_sim = linear_kernel(count_matrix, count_matrix)
         idx = indices[titulo]
