@@ -1,38 +1,29 @@
-#def cantidad_filmaciones_mes( Mes ):
-# Se ingresa un mes en idioma Español. Debe devolver la cantidad
-# de películas que fueron estrenadas en el mes consultado en la totalidad del dataset.
-# Ejemplo de retorno: X cantidad de películas fueron estrenadas en el mes de X
 
 #levantar servidor uvicorn: uvicorn main:app --reload
+### Librerias necesarias
 from fastapi import FastAPI
 import pandas as pd
-#from pydantic import BaseModel
-#from fastapi.responses import JSONResponse
 import pandas as pd
 import numpy as np
 import json
-
-#from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import nltk
+
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-## librerias para el Sistema de recomendacion
-
 app = FastAPI()
-
+#lectura de los datos
 df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
 datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow')
 datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow')
-# recorte de los datos a un poco mas de la octava parte de los datos
-df_movies = df_movies[:6000]
-datos_crew = datos_crew[:60000]
-datos_cast = datos_cast[:70000]
+
+
 
 ### debido a la transformacion de los datos anidados, debemos usar json.loads y json.dumps para
 ### serializarlo o deserializarlo
@@ -49,6 +40,11 @@ async def root():
 # pasar datos como: 127.0.0.1:8000/filmaciones_mes/enero
 @app.get("/cantidad_filmaciones_mes/{mes}")
 async def cantidad_filmaciones_mes(mes: str):
+    """
+    Se ingresa un mes en idioma Español. Debe devolver la cantidad
+    de películas que fueron estrenadas en el mes consultado en la totalidad del dataset.
+    ej: agosto
+    """
     df_unico = df_movies.drop_duplicates(subset=['id_credit', 'release_date'])
     cantidad_peliculas_mes = df_unico['release_date'].dt.month.value_counts()
     cantidad_peliculas_mes.sort_index(inplace=True)
@@ -94,17 +90,13 @@ async def cantidad_filmaciones_mes(mes: str):
         print("valor no valido, use solo letras sin tildes")
         return {}
 
-#def cantidad_filmaciones_dia( Dia ): Se ingresa un día en idioma Español.
-# Funcion para cantidad de filmaciones por dia
-
-
-# Aclaracion: a la funcion cantidad_filmaciones_dia, se le pasara como parametro un int representando el dia del mes
-# A la funciones cantidad_filmaciones_diaDeSemana, se le pasara el dia de la semana como cadena de texto sin tildes
-# lunes,martes,miercoles,jueves,viernes,sabado,domingo
-
 
 @app.get("/cantidad_filmaciones_dia/{dia}")
 async def cantidad_filmaciones_dia(dia: str):
+    """_summary_
+    Se ingresa un día en idioma Español. Funcion para cantidad de filmaciones por dia
+    ej: Lunes o lunes
+    """
     dia = str(dia).lower()
     df_unico = df_movies.drop_duplicates(subset=['id_credit', 'release_date'])
     peliculas_dia = df_unico['release_date'].dt.day_of_week.value_counts()
@@ -137,28 +129,14 @@ async def cantidad_filmaciones_dia(dia: str):
         return {}
 
 
-@app.get("/cantidad_filmaciones_diaDelMes/{dia}")
-async def cantidad_filmaciones_diaDelMes(dia: int):
-    df_unico = df_movies.drop_duplicates(subset=['id_credit', 'release_date'])
-    peliculas_dia = df_unico['release_date'].dt.day.value_counts()
-    peliculas_dia.sort_index(inplace=True)
-    if type(dia) == int:
-        retorno = peliculas_dia[dia]
-        return {f"la cantidad de peliculas estrenadas el dia {dia} es:":str(retorno)}
-    else:
-        return {}
-
-#def score_titulo( titulo_de_la_filmación ): Se ingresa el título de una filmación esperando
-# como respuesta el título, el año de estreno y el score.
-# Ejemplo de retorno: La película X fue estrenada en el año X con un score/popularidad de X
-
-
-#@app.get("/score_titulo/{dia}")
-#async def score_titulo(titulo: str):
- #   return None
 
 @app.get("/score_titulo/{titulo}")
 async def score_titulo(titulo: str):
+    """_summary_
+    def score_titulo( titulo_de_la_filmación ): Se ingresa el título de una filmación esperando
+    como respuesta el título, el año de estreno y el score.
+    ej: Toy Story
+    """
     titulo = str(titulo).strip().lower()
     df_movies['title'] = df_movies['title'].str.lower() 
     df_unico = df_movies.drop_duplicates(subset=['title','id_credit'])
@@ -170,13 +148,13 @@ async def score_titulo(titulo: str):
     score = filtrado['popularity'].values[0]
     return {titulo:f"La película {titulo} fue estrenada en el año {año} con un score/popularidad de {score}."}
 
-#def votos_titulo( titulo_de_la_filmación ): Se ingresa el título de una filmación esperando
-# como respuesta el título, la cantidad de votos y el valor promedio de las votaciones. La misma variable deberá de contar con al menos 2000 valoraciones, caso contrario, debemos contar con un mensaje avisando que no cumple esta condición y que por ende, no se devuelve ningun valor.
-# Ejemplo de retorno:
-# La película X fue estrenada en el año X. La misma cuenta con un total de X valoraciones, con un promedio de X
-
 @app.get("/votos_titulo/{titulo}")
 async def votos_titulo(titulo: str):
+    """
+    def votos_titulo( titulo_de_la_filmación ): Se ingresa el título de una filmación esperando
+    como respuesta el título, la cantidad de votos y el valor promedio de las votaciones.
+    ej: Toy Story
+    """
     titulo = str(titulo).strip().lower()
     df_movies['title'] = df_movies['title'].str.lower()
     df_unico = df_movies.drop_duplicates(subset=['title','id_credit'])
@@ -194,14 +172,13 @@ async def votos_titulo(titulo: str):
     except:
         return {"No se encontró información sobre la filmación:":titulo}
 
-#def get_actor( nombre_actor ): Se ingresa el nombre de un actor que se encuentre dentro
-# de un dataset debiendo devolver el éxito del mismo medido a través del retorno. Además, la cantidad de películas que en las que ha participado y el promedio de retorno. La definición no deberá considerar directores.
-# Ejemplo de retorno: El actor X ha participado de X cantidad de filmaciones,
-#                      el mismo ha conseguido un retorno de X con un promedio de X por filmación
-#uvicorn main:app --reload
-
 @app.get("/get_actor/{actor}")
 async def get_actor(actor: str):
+    """
+    def get_actor( nombre_actor ): Se ingresa el nombre de un actor que se encuentre dentro
+    de un dataset debiendo devolver el éxito del mismo medido a través del retorno.
+    ej: Tom Hanks
+    """
     datos_cast['name'] = datos_cast['name'].str.lower()
     actor = actor.strip().lower()
     df_cast_filtrado = datos_cast[datos_cast['name']== actor]
@@ -214,15 +191,16 @@ async def get_actor(actor: str):
     else:
         return {f"El actor no se encuentra en el sistema ":actor}
 
-#def get_director( nombre_director ): Se ingresa el nombre de un director que se
-# encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través
-# del retorno. Además, deberá devolver el nombre de cada película con la
-# fecha de lanzamiento, retorno individual, costo y ganancia de la misma.
-
 #uvicorn main:app --reload
 
 @app.get("/get_director/{director}")
 async def get_director(director: str):
+    """
+    def get_director( nombre_director ): Se ingresa el nombre de un director que se
+    encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través
+    del retorno.
+    ej: John Lasseter - Tom Hanks
+    """
     datos_crew['job'] = datos_crew['job'].str.lower()
     datos_crew['name'] = datos_crew['name'].str.lower()
     director = director.strip().lower()
@@ -243,142 +221,57 @@ async def get_director(director: str):
             'revenue': row['revenue']}
         director_dic['peliculas'].append(pelicula_dic)
     return director_dic
-    #return {"exito": total_return,
-     #       "peliculas": peliculas_director}
 
 
-#nltk.download('popular')
-
+from Funciones import juntar_listas
+from Funciones import preprocesamiento
+from Funciones import contiene_genero
 stopwords = nltk.corpus.stopwords.words('english')
 lemmatizer = WordNetLemmatizer()
-### Funcion para convertir los generos de lista de listas a strings separados por ","
-def juntar_listas(lista):
-  if isinstance(lista, (list)):
-    return ','.join([str(elemento[1]) for elemento in lista])
-
-### funcion preprocesamiento para tokenizar(lematizar) el texto
-def preprocesamiento(texto):
-    tokens = word_tokenize(texto.lower())
-    tokens = [lemmatizer.lemmatize(token) for token in tokens if token.isalpha() and token not in stopwords]
-    return ' '.join(tokens)
-
-### funcion contiene_genero para verificar si contiene un genero o no
-def contiene_genero(genres, genres_to_filter):
-    genres_list = [genre.strip() for genre in genres.split(',')]
-    return any(genre in genres_list for genre in genres_to_filter)
-
-
-
-### Funcion recomendacion(titulo): Se ingresa el nombre de una película y te recomienda
-### las similares en una lista de 5 valores.
-#uvicorn main:app --reload
+# recorte de los dataframes a un poco mas de la octava parte de los datos
+df_movies = df_movies[:6000]
+datos_crew = datos_crew[:60000]
+datos_cast = datos_cast[:70000]
 df_movies['generos'] = df_movies['genres'].apply(juntar_listas)
 df_movies['title'] = df_movies['title'].str.lower()
 df_movies = df_movies.dropna(axis=0,subset=['overview'])
+df_movies = df_movies.drop_duplicates(subset=['title'])
 df_movies['processed_overview'] = df_movies['overview'].apply(preprocesamiento)
 
-from sklearn.feature_extraction.text import CountVectorizer
 @app.get("/recomendacion/{titulo}")
 async def recomendacion(titulo: str):
+    """
+    Funcion recomendacion(titulo): Se ingresa el nombre de una película y te recomienda
+    las similares en una lista de 5 valores.
+    Esta funcion debido al limitante de render, se limita solo a recomendar en base a una octava parte
+    de los datos(primeras 6000 instancias)
+    Ejemplos: Toy Story - Tom and Huck - Sudden Death
+    """
     titulo = str(titulo).strip().lower()
     try:
-        linea = df_movies[df_movies['title'] == titulo]
-        generos = linea['generos']
-        generos_list = generos.str.split(',')
+        linea = df_movies[df_movies['title'] == titulo] # Obtener la instancia del titulo
+        generos = linea['generos'] # variable con los generos de la pelicula
+        generos_list = generos.str.split(',') # usamos .split() para poder convertir a lista
         generos_list = list(generos_list.values)
+        # filtramos las peliculas que compartan al menos 1 genero con la pelicula pasada como parametro
         df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
-        df_filtrado.drop_duplicates(subset=['title'], inplace=True)
+        df_filtrado.drop_duplicates(subset=['title'], inplace=True) #drop de duplicados
+        # se resetea el indice porque creamos el dataframe filtrado por los generos
         df_filtrado = df_filtrado.reset_index()
         df_filtrado.drop(columns=['index'], inplace=True)
         indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
-        #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
-
-        # Usando CountVectorizer
-        count = CountVectorizer(max_df=0.2, max_features=25)
-        count_matrix = count.fit_transform(df_filtrado['processed_overview'])
-
+        # CountVectorizer
+        count = CountVectorizer(max_df=0.8, max_features=50) # instanciamos el CountVectorizer
+        # transformamos la data ya lematizada.
+        count_matrix = count.fit_transform(df_filtrado['processed_overview']) 
         # Calcular la similitud del coseno
         cosine_sim = linear_kernel(count_matrix, count_matrix)
         idx = indices[titulo]
         sim_scores = list(enumerate(cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:6]
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True) #reordenar el array
+        sim_scores = sim_scores[1:6] # obtengo los 5 mejores
         movie_indices = [i[0] for i in sim_scores]
         lista_top = df_movies['title'].iloc[movie_indices].tolist()
         return {f'Las recomendaciones para {titulo} son: ': lista_top}
     except:
         return {"la pelicula no se encuentra en el sistema:": titulo}
-
-
-"""
-from sklearn.feature_extraction.text import HashingVectorizer
-
-
-@app.get("/recomendacionHV/{titulo}")
-async def recomendacionHV(titulo: str):
-    titulo = str(titulo).strip().lower()
-    try:
-        linea = df_movies[df_movies['title'] == titulo]
-        generos = linea['generos']
-        generos_list = generos.str.split(',')
-        generos_list = list(generos_list.values)
-        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
-        df_filtrado.drop_duplicates(subset=['title'], inplace=True)
-        df_filtrado = df_filtrado.reset_index()
-        df_filtrado.drop(columns=['index'], inplace=True)
-        indices = pd.Series(df_filtrado.index, index=df_filtrado['title'])
-        #df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento)
-
-        # Usando HashingVectorizer
-        hashing = HashingVectorizer(n_features=10, alternate_sign=False)
-        hashing_matrix = hashing.fit_transform(df_filtrado['processed_overview'])
-
-        # Calcular la similitud del coseno
-        cosine_sim = linear_kernel(hashing_matrix, hashing_matrix)
-        idx = indices[titulo]
-        sim_scores = list(enumerate(cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:6]
-        movie_indices = [i[0] for i in sim_scores]
-        lista_top = df_movies['title'].iloc[movie_indices].tolist()
-        return {f'Las recomendaciones para {titulo} son: ': lista_top}
-    except:
-        return {"la pelicula no se encuentra en el sistema:": titulo}
-    
-    
-@app.get("/recomendacion/{titulo}")
-async def recomendacion(titulo: str):
-    titulo =str(titulo).strip().lower()
-    try:
-        linea = df_movies[df_movies['title']== titulo]
-        generos = linea['generos']
-        generos_list = generos.str.split(',')
-        generos_list = list(generos_list.values)
-        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
-        df_filtrado.drop_duplicates(subset=['title'],inplace=True)
-        #se resetea el indice porque creamos el dataframe filtrado por los generos
-        df_filtrado = df_filtrado.reset_index()
-        df_filtrado.drop(columns=['index'],inplace=True)
-        # se resetea el indice porque creamos el dataframe filtrado por los generos
-        indices = pd.Series(df_filtrado.index,index=df_filtrado['title']) #Crear los indices del dataframe
-        df_filtrado['processed_overview'] = df_filtrado['overview'].apply(preprocesamiento) #se tokeniza el texto
-        # creación de matriz TF-IDF
-        # max_df = 0.5 equivale a eliminar del modelo los términos que aparecen en más del 50% de los documentos o peliculas.
-        # es decir, mientras mas reduzca el parametro "max_df" mayor sera la
-        # importancia relativa de las palabras menos frecuentes
-        tfidf = TfidfVectorizer(max_df=0.2, max_features=25, sublinear_tf=True)
-        # por el hecho del costo computacional que genera esta vectorizacion de palabras se usara max_features=50
-        tfidf_matrix = tfidf.fit_transform(df_filtrado['processed_overview'])
-        # Calcular la similitud del coseno
-        cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
-        idx = indices[titulo]
-        sim_scores = list(enumerate(cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:6]
-        movie_indices = [i[0] for i in sim_scores]
-        lista_top = df_movies['title'].iloc[movie_indices].tolist()
-        return {f'Las recomendaciones para {titulo} son: ':lista_top}
-    except:
-        return{"la pelicula no se encuentra en el sistema:":titulo}
-
-"""
