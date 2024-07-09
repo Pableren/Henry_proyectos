@@ -1,36 +1,26 @@
 #libreria de funciones:
 import pandas as pd
 import numpy as np
-import re
-import json
 import ast
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-import nltk
-
-#df = pd.read_csv('movies.csv',parse_dates=['release_date'])
-#df_unico = df.drop_duplicates(subset=['id', 'release_date'])
-#cantidad_peliculas_mes = df_unico['release_date'].dt.month.value_counts()
-#cantidad_peliculas_mes.sort_index(inplace=True)
-#cantidad_peliculas = df_movies[]
-
-#df_unico = df_movi.drop_duplicates(subset=['id', 'release_date'])
-#cantidad_peliculas_mes = df_unico['release_date'].dt.month.value_counts()
-#cantidad_peliculas_mes.sort_index(inplace=True)
-
 
 ### Funcion para convertir los generos de lista de listas a strings separados por ","
 def juntar_listas(lista):
   if isinstance(lista, (list)):
     return ','.join([str(elemento[1]) for elemento in lista])
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
-stopwords = nltk.corpus.stopwords.words('english')
-lemmatizer = WordNetLemmatizer()
-### funcion preprocesamiento para tokenizar(lematizar) el texto
+
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+import nltk
 def preprocesamiento(texto):
+    """
+    la funcion procesamiento tokeniza el texto, elimina las stop words y lematiza las palabras
+    """
+    nltk.download('punkt')
+    nltk.download('stopwords')
+    nltk.download('wordnet')
+    stopwords = nltk.corpus.stopwords.words('english')
+    lemmatizer = WordNetLemmatizer()
     tokens = word_tokenize(texto.lower())
     tokens = [lemmatizer.lemmatize(token) for token in tokens if token.isalpha() and token not in stopwords]
     return ' '.join(tokens)
@@ -94,6 +84,7 @@ def convertir_str_list(ser):
         return lista
 
 """
+
 from sklearn.feature_extraction.text import HashingVectorizer
 
 

@@ -20,9 +20,9 @@ nltk.download('wordnet')
 
 app = FastAPI()
 #lectura de los datos
-df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
-datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow')
-datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow')
+df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow',columns=['title', 'release_year', 'popularity', 'id','release_date','overview_tokenizado'])
+datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow',columns=['job', 'name'])
+datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow',columns=['name'])
 #recorte de los datasets
 df_movies = df_movies[:6000]
 datos_crew = datos_crew[:60000]
@@ -39,8 +39,6 @@ df_movies = df_movies.rename(columns={'id': 'id_credit'})
 async def root():
     return "Raiz de la API"
 
-#Funcion para cantidad de filmaciones por mes:
-# pasar datos como: 127.0.0.1:8000/filmaciones_mes/enero
 @app.get("/cantidad_filmaciones_mes/{mes}")
 async def cantidad_filmaciones_mes(mes: str):
     """
@@ -134,7 +132,7 @@ async def cantidad_filmaciones_dia(dia: str):
         return {}
 
 
-
+df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow')
 @app.get("/score_titulo/{titulo}")
 async def score_titulo(titulo: str):
     """_summary_
@@ -209,7 +207,7 @@ async def get_director(director: str):
     del retorno.
     Basado en las primeras 6000 lineas de la data general
     ej: John Lasseter - Tom Hanks
-    """
+    """ 
     datos_crew['job'] = datos_crew['job'].str.lower()
     datos_crew['name'] = datos_crew['name'].str.lower()
     director = director.strip().lower()
@@ -234,9 +232,7 @@ async def get_director(director: str):
 
 from Funciones import juntar_listas
 from Funciones import contiene_genero
-#stopwords = nltk.corpus.stopwords.words('english')
-#lemmatizer = WordNetLemmatizer()
-# recorte de los dataframes a un poco mas de la octava parte de los datos
+
 df_movies['generos'] = df_movies['genres'].apply(juntar_listas)
 df_movies['title'] = df_movies['title'].str.lower()
 df_movies = df_movies.dropna(axis=0,subset=['overview'])
