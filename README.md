@@ -70,6 +70,7 @@ La data presenta en varias variables valores atipicos, y en variables como vote_
 - README.md: Documentacion del proyecto
 - requirements.txt: Archivo con las librerias y dependencias del proyecto
 - main.py: Archivo principal de la api.
+- Funciones.py: Archivo que almacena las funciones creadas durante el proyecto y que serviran para procesar y visualizar los datos.
 
 ### Uso y Ejecución
 
