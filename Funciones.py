@@ -2,6 +2,8 @@
 import pandas as pd
 import numpy as np
 import ast
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 ### Funcion para convertir los generos de lista de listas a strings separados por ","
 def juntar_listas(lista):
@@ -82,6 +84,20 @@ def convertir_str_list(ser):
         return lista
     except:
         return lista
+
+def grafico_de_caja(df,column, title=''):
+    # Funcion para graficar todos los graficos de caja de cada una de las variables del dataframe.
+    n_rows = len(column)
+    fig, axes = plt.subplots(nrows=n_rows, figsize=(15, 20))
+    fig.tight_layout()
+    fig.subplots_adjust(hspace=0.5)
+    for i in range(n_rows):
+        ax = axes[i]
+        sns.boxplot(data=df[column[i]], ax=ax, orient='h')
+        ax.set_title(f'{column[i]} {title}', loc="right")
+    return plt.show()
+
+
 
 """
 
