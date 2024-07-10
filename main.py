@@ -32,7 +32,6 @@ async def cantidad_filmaciones_mes(mes: str):
     """
     Se ingresa un mes en idioma Español. Debe devolver la cantidad
     de películas que fueron estrenadas en el mes consultado en la totalidad del dataset.
-    Basado en las primeras 6000 lineas de la data general
     ej: agosto
     """
     df_unico = df_movies.drop_duplicates(subset=['id_credit', 'release_date'])
@@ -86,7 +85,6 @@ async def cantidad_filmaciones_dia(dia: str):
     """_summary_
     Se ingresa un día en idioma Español. Funcion para cantidad de filmaciones por dia
     ej: Lunes o lunes
-    Basado en las primeras 6000 lineas de la data general
     """
     dia = str(dia).lower()
     df_unico = df_movies.drop_duplicates(subset=['id_credit', 'release_date'])
@@ -145,7 +143,6 @@ async def votos_titulo(titulo: str):
     """
     def votos_titulo( titulo_de_la_filmación ): Se ingresa el título de una filmación esperando
     como respuesta el título, la cantidad de votos y el valor promedio de las votaciones.
-    Basado en las primeras 6000 lineas de la data general
     ej: Toy Story
     """
     titulo = str(titulo).strip().lower()
@@ -169,7 +166,6 @@ async def get_actor(actor: str):
     """
     def get_actor( nombre_actor ): Se ingresa el nombre de un actor que se encuentre dentro
     de un dataset debiendo devolver el éxito del mismo medido a través del retorno.
-    Basado en las primeras 6000 lineas de la data general
     ej: Tom Hanks
     """
     datos_cast['name'] = datos_cast['name'].str.lower()
@@ -191,7 +187,6 @@ async def get_director(director: str):
     def get_director( nombre_director ): Se ingresa el nombre de un director que se
     encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través
     del retorno.
-    Basado en las primeras 6000 lineas de la data general
     ej: John Lasseter - Tom Hanks
     """ 
     datos_crew['job'] = datos_crew['job'].str.lower()
@@ -218,9 +213,7 @@ async def get_director(director: str):
 
 
 from Funciones import contiene_genero
-
 df_movies_recortado = df_movies[:6000]
-#df_movies = df_movies[:6000]
 @app.get("/recomendacion/{titulo}")
 async def recomendacion(titulo: str):
     """
