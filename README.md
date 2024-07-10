@@ -66,10 +66,11 @@ La data presenta en varias variables valores atipicos, y en variables como vote_
 
 ### Documentos del proyecto
 - data/: Contiene los datasets del proyecto.
-- notebooks/: Notebooks(eda y etl) y archivos(Funciones.py) python del proyecto
+- notebooks/: Notebooks(eda y etl) del proyecto
 - README.md: Documentacion del proyecto
 - requirements.txt: Archivo con las librerias y dependencias del proyecto
 - main.py: Archivo principal de la api.
+- Funciones.py: Archivo que almacena las funciones creadas durante el proyecto y que serviran para procesar y visualizar los datos.
 
 ### Uso y Ejecución
 
