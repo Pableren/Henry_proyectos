@@ -4,16 +4,20 @@ https://github.com/soyHenry/fe-ct-pimlops2
 
 ### Tabla de contenidos
 
-1. [Instalacion y requisitos](#instalacion-y-requisitos)
-2. [Pasos de instalacion](#pasos-de-instalacion)
-3.  [Etl](#etl)
-4.  [Api](#api)
-5.  [Eda](#eda)
-6.  [Documentos del proyecto](#documentos-del-proyecto)
-7.  [Uso y Ejecución](#uso-y-ejecución)
-8.  [Datos y Fuentes](#datos-y-fuentes)
-9.  [Metodologia](#metodologia)
-10.  [Autor](#autor)
+1. [Contexto](#contexto)
+2. [Instalacion y requisitos](#instalacion-y-requisitos)
+3. [Pasos de instalacion](#pasos-de-instalacion)
+4. [Etl](#etl)
+5. [Api](#api)
+6. [Eda](#eda)
+7. [Documentos del proyecto](#documentos-del-proyecto)
+8. [Uso y Ejecución](#uso-y-ejecución)
+9. [Datos y Fuentes](#datos-y-fuentes)
+10.[Metodologia](#metodologia)
+11.[Autor](#autor)
+
+### Contexto
+Te encuentras trabajando como Data Scientist en una startup que ofrece servicios de agregación de plataformas de streaming. Te han asignado la tarea de desarrollar un sistema de recomendación de películas para los usuarios de la plataforma. Para ello, deberás realizar un proceso de Extracción, Transformación y Carga (ETL) de los datos, un Análisis Exploratorio de Datos (EDA) y finalmente, implementar una API para que el sistema pueda ser utilizado por la aplicación.
 
 ### Instalacion y requisitos
 
