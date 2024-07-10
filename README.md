@@ -4,7 +4,7 @@ https://github.com/soyHenry/fe-ct-pimlops2
 
 ### Tabla de contenidos
 
-1. [Instalacion y requisitos](#instalación-y-requisitos)
+1. [Instalacion y requisitos](#instalacion-y-requisitos)
 2. [Pasos de instalacion](#pasos-de-instalacion)
 3.  [Etl](#etl)
 4.  [Api](#api)
@@ -12,7 +12,7 @@ https://github.com/soyHenry/fe-ct-pimlops2
 6.  [Documentos del proyecto](#documentos-del-proyecto)
 7.  [Uso y Ejecución](#uso-y-ejecución)
 8.  [Datos y Fuentes](#datos-y-fuentes)
-9.  [Metodología](#metodología)
+9.  [Metodologia](#metodologia)
 10.  [Autor](#autor)
 
 ### Instalacion y requisitos
