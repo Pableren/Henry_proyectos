@@ -1,7 +1,4 @@
-# Proyecto Individual: 
-https://github.com/mariangigena/Documentacion
-https://github.com/soyHenry/fe-ct-pimlops2
-
+# Proyecto Individual: Plataforma de Streaming: Movies
 ### Tabla de contenidos
 
 1. [Contexto](#contexto)
