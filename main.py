@@ -11,17 +11,14 @@ from sklearn.metrics.pairwise import linear_kernel
 
 app = FastAPI()
 #lectura de los datos
-df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow',columns=['title', 'release_year', 'popularity', 'id','release_date','overview_tokenizado','genres'])
-datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow',columns=['job', 'name'])
-datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow',columns=['name'])
-#recorte de los datasets
-df_movies = df_movies[:6000]
-datos_crew = datos_crew[:60000]
-datos_cast = datos_cast[:70000]
-
-### debido a la transformacion de los datos anidados, debemos usar json.loads y json.dumps para
-### serializarlo o deserializarlo
-df_movies['genres'] = df_movies['genres'].apply(json.loads)
+df_movies = pd.read_parquet('data/df_movies_parquet.parquet',engine='pyarrow',columns=['title', 'release_year', 'popularity', 'id','release_date','overview_tokenizado','genres','vote_count','vote_average','return','budget','revenue','generos'])
+datos_crew = pd.read_parquet('data/df_crew_parquet.parquet',engine='pyarrow',columns=['job', 'name','id_credit'])
+datos_cast = pd.read_parquet('data/df_cast_parquet.parquet',engine='pyarrow',columns=['name','id_credit'])
+#transformacion de los datos
+df_movies['title'] = df_movies['title'].str.lower()
+df_movies = df_movies.dropna(axis=0,subset=['overview_tokenizado'])
+df_movies = df_movies.drop_duplicates(subset=['title'])
+#df_movies['genres'] = df_movies['genres'].apply(json.loads)
 
 df_movies = df_movies.rename(columns={'id': 'id_credit'})
 
@@ -142,6 +139,7 @@ async def score_titulo(titulo: str):
     score = filtrado['popularity'].values[0]
     return {titulo:f"La película {titulo} fue estrenada en el año {año} con un score/popularidad de {score}."}
 
+
 @app.get("/votos_titulo/{titulo}")
 async def votos_titulo(titulo: str):
     """
@@ -151,9 +149,7 @@ async def votos_titulo(titulo: str):
     ej: Toy Story
     """
     titulo = str(titulo).strip().lower()
-    df_movies['title'] = df_movies['title'].str.lower()
-    df_unico = df_movies.drop_duplicates(subset=['title','id_credit'])
-    filmacion = df_unico[df_unico['title'] == titulo]
+    filmacion = df_movies[df_movies['title'] == titulo]
     try:
         if filmacion['vote_count'].values[0] < 2000:
             return {f"la pelicula {titulo} no supera las 2000 votaciones necesarias para entrar en este ranking":titulo}
@@ -166,6 +162,7 @@ async def votos_titulo(titulo: str):
         return {f"la pelicula {title} fue estrenada en el año {año}. La misma cuenta con un total de {votos} valoraciones, con un promedio de {promedio}":title}
     except:
         return {"No se encontró información sobre la filmación:":titulo}
+
 
 @app.get("/get_actor/{actor}")
 async def get_actor(actor: str):
@@ -186,6 +183,8 @@ async def get_actor(actor: str):
         return {f"El actor {actor} ha participado de {cantidad_peliculas} filmaciones, el mismo ha conseguido un retorno de {retorno_total} con un promedio de {promedio_retorno:.2f} por filmación.": actor}
     else:
         return {f"El actor no se encuentra en el sistema ":actor}
+    
+    
 @app.get("/get_director/{director}")
 async def get_director(director: str):
     """
@@ -217,14 +216,11 @@ async def get_director(director: str):
     return director_dic
 
 
-from Funciones import juntar_listas
+
 from Funciones import contiene_genero
 
-df_movies['generos'] = df_movies['genres'].apply(juntar_listas)
-df_movies['title'] = df_movies['title'].str.lower()
-df_movies = df_movies.dropna(axis=0,subset=['overview_tokenizado'])
-df_movies = df_movies.drop_duplicates(subset=['title'])
-
+df_movies_recortado = df_movies[:6000]
+#df_movies = df_movies[:6000]
 @app.get("/recomendacion/{titulo}")
 async def recomendacion(titulo: str):
     """
@@ -234,14 +230,16 @@ async def recomendacion(titulo: str):
     de los datos(primeras 6000 instancias)
     Ejemplos: Toy Story - Tom and Huck - Sudden Death
     """
+    
     titulo = str(titulo).strip().lower()
     try:
-        linea = df_movies[df_movies['title'] == titulo] # Obtener la instancia del titulo
+        linea = df_movies_recortado[df_movies_recortado['title'] == titulo] # Obtener la instancia del titulo
         generos = linea['generos'] # variable con los generos de la pelicula
         generos_list = generos.str.split(',') # usamos .split() para poder convertir a lista
         generos_list = list(generos_list.values)
+        print(generos_list)
         # filtramos las peliculas que compartan al menos 1 genero con la pelicula pasada como parametro
-        df_filtrado = df_movies[df_movies['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
+        df_filtrado = df_movies_recortado[df_movies_recortado['generos'].apply(lambda x: contiene_genero(x, generos_list[0]))]
         df_filtrado.drop_duplicates(subset=['title'], inplace=True) #drop de duplicados
         # se resetea el indice porque creamos el dataframe filtrado por los generos
         df_filtrado = df_filtrado.reset_index()
@@ -259,7 +257,7 @@ async def recomendacion(titulo: str):
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True) #reordenar el array
         sim_scores = sim_scores[1:6] # obtengo los 5 mejores
         movie_indices = [i[0] for i in sim_scores]
-        lista_top = df_movies['title'].iloc[movie_indices].tolist()
+        lista_top = df_movies_recortado['title'].iloc[movie_indices].tolist()
         return {f'Las recomendaciones para {titulo} son: ': lista_top}
     except:
         return {"la pelicula no se encuentra en el sistema:": titulo}
