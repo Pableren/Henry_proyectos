@@ -30,7 +30,7 @@ Te encuentras trabajando como Data Scientist en una startup que ofrece servicios
 Para una mayor especificación revisar el archivo requirements.txt
 
 ### Pasos de instalacion:
-1. Clonar el repositorio: "url del repo"
+1. Clonar el repositorio: "[url del repo](https://github.com/Pableren/Henry_proyectos.git)"
 2. Crear el entorno virtual: "python -m venv venv
 3. Activar el entorno virtual:
 - Navegar hacia la carpeta
@@ -82,7 +82,7 @@ Se realizo un analisis exploratorio de los datos para encontrar patrones y tende
 
 ### Autor:
 
-Este proyecto fue realizado por Pablo Chamena.
+Este proyecto fue realizado por Pablo Chamena. Dataft23 grupo 03
 
-- Linkedin: (url)
+- Linkedin: (www.linkedin.com/in/pablo-chamena-8814bb211)
 
