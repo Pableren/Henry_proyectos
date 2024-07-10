@@ -222,7 +222,7 @@ from Funciones import contiene_genero
 
 df_movies['generos'] = df_movies['genres'].apply(juntar_listas)
 df_movies['title'] = df_movies['title'].str.lower()
-df_movies = df_movies.dropna(axis=0,subset=['overview'])
+df_movies = df_movies.dropna(axis=0,subset=['overview_tokenizado'])
 df_movies = df_movies.drop_duplicates(subset=['title'])
 
 @app.get("/recomendacion/{titulo}")
