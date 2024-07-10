@@ -5,7 +5,7 @@ https://github.com/soyHenry/fe-ct-pimlops2
 ### Tabla de contenidos
 
 1. [Instalacion y requisitos](#instalación-y-requisitos)
-2. [Estructura del proyecto](#estructura-del-proyecto)
+2. [Documentos del proyecto](#documentos-del-proyecto)
 
 ### Instalacion y requisitos
 
