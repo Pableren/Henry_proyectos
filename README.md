@@ -13,8 +13,8 @@ https://github.com/soyHenry/fe-ct-pimlops2
 7. [Documentos del proyecto](#documentos-del-proyecto)
 8. [Uso y Ejecución](#uso-y-ejecución)
 9. [Datos y Fuentes](#datos-y-fuentes)
-10.[Metodologia](#metodologia)
-11.[Autor](#autor)
+10. [Metodologia](#metodologia)
+11. [Autor](#autor)
 
 ### Contexto
 Te encuentras trabajando como Data Scientist en una startup que ofrece servicios de agregación de plataformas de streaming. Te han asignado la tarea de desarrollar un sistema de recomendación de películas para los usuarios de la plataforma. Para ello, deberás realizar un proceso de Extracción, Transformación y Carga (ETL) de los datos, un Análisis Exploratorio de Datos (EDA) y finalmente, implementar una API para que el sistema pueda ser utilizado por la aplicación.
