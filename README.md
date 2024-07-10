@@ -8,10 +8,9 @@
 5. [Api](#api)
 6. [Eda](#eda)
 7. [Documentos del proyecto](#documentos-del-proyecto)
-8. [Uso y Ejecución](#uso-y-ejecución)
-9. [Datos y Fuentes](#datos-y-fuentes)
-10. [Metodologia](#metodologia)
-11. [Autor](#autor)
+8. [Datos y Fuentes](#datos-y-fuentes)
+9. [Metodologia](#metodologia)
+10. [Autor](#autor)
 
 ### Contexto
 Te encuentras trabajando como Data Scientist en una startup que ofrece servicios de agregación de plataformas de streaming. Te han asignado la tarea de desarrollar un sistema de recomendación de películas para los usuarios de la plataforma. Para ello, deberás realizar un proceso de Extracción, Transformación y Carga (ETL) de los datos, un Análisis Exploratorio de Datos (EDA) y finalmente, implementar una API para que el sistema pueda ser utilizado por la aplicación.
@@ -31,7 +30,7 @@ Te encuentras trabajando como Data Scientist en una startup que ofrece servicios
 Para una mayor especificación revisar el archivo requirements.txt
 
 ### Pasos de instalacion:
-1. Clonar el repositorio: "url del repo"
+1. Clonar el repositorio: "[url del repo](https://github.com/Pableren/Henry_proyectos.git)"
 2. Crear el entorno virtual: "python -m venv venv
 3. Activar el entorno virtual:
 - Navegar hacia la carpeta
@@ -72,23 +71,18 @@ La data presenta en varias variables valores atipicos, y en variables como vote_
 - main.py: Archivo principal de la api.
 - Funciones.py: Archivo que almacena las funciones creadas durante el proyecto y que serviran para procesar y visualizar los datos.
 
-### Uso y Ejecución
-
-- Levantar el servidor de uvicorn con la ejecucion del archivo main.py o cargar la url del repositorio en render.
-
 ### Datos y fuentes
-### CAMBIAR
-El sector de recursos humanos nos proporciono una base de datos con datos acerca de las peliculas de Disney y datos con los creditos de las peliculas(reparto y equipo)
+
+La empresa start-up que provee servicios de agregación de plataformas de streaming nos consiguio una muestra de su base de datos para analizar con informacion respecto de las peliculas, reparto y equipo.
 
 ### Metodologia
 
 Se aplicaron metodos de procesamiento de los datos para aumentar la eficiencia de la lectura de los datos y mejorar la eficiencia de las funciones.
 Se realizo un analisis exploratorio de los datos para encontrar patrones y tendencia en los datos de las peliculas. Tambien se aplico un sistema de recomendacion con un CountVectorizer para evaluar la similitud de las peliculas.
 
-
 ### Autor:
 
-Este proyecto fue realizado por Pablo Chamena.
+Este proyecto fue realizado por Pablo Chamena. Dataft23 grupo 03
 
-- Linkedin: (url)
+- Linkedin: (www.linkedin.com/in/pablo-chamena-8814bb211)
 
