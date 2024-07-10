@@ -1,5 +1,6 @@
 # Proyecto Individual: 
-
+https://github.com/mariangigena/Documentacion
+https://github.com/soyHenry/fe-ct-pimlops2
 ### ETL
 
 Se realizo un proceso ETL donde se extrajo la informacion de los datos, contenida en 2 archivos. Separados en peliculas y creditos.
